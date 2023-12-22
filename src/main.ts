@@ -1,4 +1,4 @@
-import { User, Ticket, Event } from "@prisma/client";
+import { User, Ticket, Event, Categories, Payment } from "@prisma/client";
 import { connectDB, prisma } from "./config/db";
 import express, { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
@@ -9,46 +9,46 @@ const PORT = 3006;
 app.use(express.json());
 connectDB();
 
-// Create User
+// Create User In Database
 app.post("/user/create", async (req: Request, res: Response) => {
-  let NewUser = req.body as User;
-  await prisma.user.create({ data: NewUser });
+  let newUser = req.body as User;
+  console.log(newUser);
+  await prisma.user.create({ data: newUser });
   res.json("User Created");
+});
+
+// Get All users
+app.get("/user/get_all", async (req: Request, res: Response) => {
+  let users = await prisma.user.findMany();
+  res.json(users);
+});
+
+// Get User With Id
+app.get("/user/get_with_id/:id", async (req: Request, res: Response) => {
+  let { id } = req.params;
+  let user = await prisma.user.findMany({ where: { id: id },select:{id:true,username:true,email:true,password:true,role:true,phone_number:true,Ticket:true} });
+  res.json(user);
+});
+
+// Delete User
+app.delete("/user/delete/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await prisma.user.delete({ where: { id: id } });
+  res.json("delete done");
 });
 
 // Update User
 app.put("/user/update/:id", async (req: Request, res: Response) => {
   let { id } = req.params;
-  let UpdatedUser = req.body as User;
-  await prisma.user.update({ where: { id: id }, data: UpdatedUser });
-  res.json("User Updated");
-});
-
-// Get All User
-app.get("/user/get", async (req: Request, res: Response) => {
-  let all_users = await prisma.user.findMany();
-  res.json(all_users);
-});
-
-// Get User with id
-app.get("/user/get_with/:id", async (req: Request, res: Response) => {
-  let { id } = req.params;
-  let user = await prisma.user.findMany({ where: { id: id },select:{id:true,username:true,email:true,password:true,role:true,phone_number:true,} });
-  res.json(user);
-});
-
-// delete User
-app.delete("/user/delete/:id", async (req: Request, res: Response) => {
-  let { id } = req.params;
-  await prisma.user.delete({ where: { id: id } });
-  res.json("User Deleted");
+  let newDataUser = req.body as User;
+  await prisma.user.update({ where: { id: id }, data: newDataUser });
+  res.json("Updated done");
 });
 
 // Create Event
 app.post("/event/create", async (req: Request, res: Response) => {
+  let check_role = prisma.user.findFirst();
   let NewEvent = req.body as Event;
-  let check_role = prisma.user.findFirst({where:{}});
-  return console.log(check_role)
   await prisma.event.create({ data: NewEvent });
   res.json("Event Created");
 });
@@ -64,7 +64,7 @@ app.get("/event/one_event/:id", async (req: Request, res: Response) => {
   let { id } = req.params;
   let one_event = await prisma.event.findMany({
     where: { id: id },
-    select: {id: true, ticket: true },
+    select: { name: true, id: true, ticket: true },
   });
   res.json(one_event);
 });

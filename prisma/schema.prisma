@@ -8,46 +8,81 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum roles {
+enum Roles {
   ADMIN
   SUPER_ADMIN
   USER
 }
 
+enum PaymentStatus {
+  pending
+  successful
+  failed
+}
+
 model User {
-  id           String   @id @default(uuid())
-  username     String
-  email        String
-  password     String
-  role         String   @default("user")
-  phone_number String
-  Ticket       Ticket[]
-  Event        Event[]
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  firstName String
+  lastName  String
+  role      Roles     @default(USER)
+  phone     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  payments  Payment[]
+  tickets   Ticket[]
 }
 
 model Event {
-  id                String   @id @default(uuid())
-  name              String
-  user_create_event String
-  user              User     @relation(fields: [user_create_event], references: [id])
-  ticket            Ticket[]
-
-  @@index([user_create_event])
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  location    String
+  startDate   DateTime
+  endDate     DateTime
+  image       String?
+  price       Int
+  isBooked    Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  tickets     Ticket[]
+  Categories  Categories[]
 }
 
 model Ticket {
-  id                 String   @id @default(uuid())
-  title              String
-  create_date        DateTime @default(now())
-  // date_of_end       DateTime
-  price              String
-  discount           Int?
-  discount_duration  Int?
-  event_id           String
-  user_create_ticket String
-  user               User     @relation(fields: [user_create_ticket], references: [id])
-  event              Event    @relation(fields: [event_id], references: [id])
+  id          String    @id @default(uuid())
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id])
+  price       Int
+  bookedBy    String
+  bookedUser  User      @relation(fields: [bookedBy], references: [id])
+  bookingDate DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  @@index([user_create_ticket])
+  @@index([eventId])
+  @@index([bookedBy])
+}
+
+
+
+model Payment {
+  id            String        @id @default(uuid())
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+
+  @@index([user_id])
+}
+
+model Categories {
+  id       String @id @default(uuid())
+  name     String
+  img      String
+  event_id String
+  event    Event  @relation(fields: [event_id], references: [id])
+
   @@index([event_id])
 }
