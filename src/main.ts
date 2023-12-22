@@ -33,7 +33,7 @@ app.get("/user/get", async (req: Request, res: Response) => {
 // Get User with id
 app.get("/user/get_with/:id", async (req: Request, res: Response) => {
   let { id } = req.params;
-  let user = await prisma.user.findMany({ where: { id: id },select:{id:true,username:true,email:true,password:true,role:true,phone_number:true,Ticket:true} });
+  let user = await prisma.user.findMany({ where: { id: id },select:{id:true,username:true,email:true,password:true,role:true,phone_number:true,} });
   res.json(user);
 });
 
@@ -46,8 +46,9 @@ app.delete("/user/delete/:id", async (req: Request, res: Response) => {
 
 // Create Event
 app.post("/event/create", async (req: Request, res: Response) => {
-  let check_role = prisma.user.findFirst();
   let NewEvent = req.body as Event;
+  let check_role = prisma.user.findFirst({where:{}});
+  return console.log(check_role)
   await prisma.event.create({ data: NewEvent });
   res.json("Event Created");
 });
@@ -63,7 +64,7 @@ app.get("/event/one_event/:id", async (req: Request, res: Response) => {
   let { id } = req.params;
   let one_event = await prisma.event.findMany({
     where: { id: id },
-    select: { name: true, id: true, ticket: true },
+    select: {id: true, ticket: true },
   });
   res.json(one_event);
 });
