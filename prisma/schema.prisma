@@ -8,28 +8,46 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum roles {
+  ADMIN
+  SUPER_ADMIN
+  USER
+}
+
 model User {
-  id           String @id @default(uuid())
+  id           String   @id @default(uuid())
   username     String
   email        String
   password     String
-  role         String @default("user")
+  role         String   @default("user")
   phone_number String
-}
-
-model Ticket {
-  id                String   @id @default(uuid())
-  title             String
-  create_date       DateTime @default(now())
-  date_of_end       DateTime
-  price             String
-  discount          Int
-  discount_duration Int
-  Event             Event[]
+  Ticket       Ticket[]
+  Event        Event[]
 }
 
 model Event {
-  id        String @id @default(uuid())
-  ticket_id String
-  ticket    Ticket [] 
+  id                String   @id @default(uuid())
+  name              String
+  user_create_event String
+  user              User     @relation(fields: [user_create_event], references: [id])
+  ticket            Ticket[]
+
+  @@index([user_create_event])
+}
+
+model Ticket {
+  id                 String   @id @default(uuid())
+  title              String
+  create_date        DateTime @default(now())
+  // date_of_end       DateTime
+  price              String
+  discount           Int?
+  discount_duration  Int?
+  event_id           String
+  user_create_ticket String
+  user               User     @relation(fields: [user_create_ticket], references: [id])
+  event              Event    @relation(fields: [event_id], references: [id])
+
+  @@index([user_create_ticket])
+  @@index([event_id])
 }
