@@ -48,9 +48,27 @@ app.put("/user/update/:id", async (req: Request, res: Response) => {
 // Create Event
 app.post("/event/create", async (req: Request, res: Response) => {
   let newEvent = req.body as Event;
+  if (newEvent.)
   await prisma.event.create({ data: newEvent });
   res.json("event added");
 });
+
+// Get All Events
+app.post("/event/get_all", async (req: Request, res: Response) => {
+  let all_event = await prisma.event.findMany()
+  res.json(all_event);
+});
+
+
+// Get Event With Id
+app.post("/event/get_all/:id", async (req: Request, res: Response) => {
+  let {id} = req.params
+  let event = await prisma.event.findMany({where:{id:id}})
+  res.json(event);
+});
+
+
+
 
 // Add Payment
 app.post("/payment/add", async (req: Request, res: Response) => {
