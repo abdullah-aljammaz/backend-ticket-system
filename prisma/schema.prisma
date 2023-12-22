@@ -1,0 +1,35 @@
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String @id @default(uuid())
+  username     String
+  email        String
+  password     String
+  role         String @default("user")
+  phone_number String
+}
+
+model Ticket {
+  id                String   @id @default(uuid())
+  title             String
+  create_date       DateTime @default(now())
+  date_of_end       DateTime
+  price             String
+  discount          Int
+  discount_duration Int
+  Event             Event[]
+}
+
+model Event {
+  id        String @id @default(uuid())
+  ticket_id String
+  ticket    Ticket [] 
+}
