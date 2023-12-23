@@ -45,11 +45,11 @@ model Event {
   image       String?
   avalible_ticket Int @default(0)
   price       Int
-  admin       String 
+  admin_id       String 
   isBooked    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [admin], references: [id])
+  user        User     @relation(fields: [admin_id], references: [id])
   tickets    Ticket[]
   Categories Categories[]
   
