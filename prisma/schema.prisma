@@ -10,8 +10,8 @@ generator client {
 
 enum Roles {
   ADMIN
-  SUPER_ADMIN
   USER
+  SUPER_ADMIN
 }
 
 enum PaymentStatus {
@@ -26,8 +26,8 @@ model User {
   password  String
   firstName String
   lastName  String
-  isAdmin   Boolean   @default(false)
   phone     String
+  role      Roles @default(USER)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   payments  Payment[]
@@ -59,16 +59,16 @@ model Event {
 }
 
 model Ticket {
-  id               String   @id @default(uuid())
-  eventId          String
-  event            Event    @relation(fields: [eventId], references: [id])
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
   // number_of_guests Int
-  price            Int
-  bookedBy         String
-  bookedUser       User     @relation(fields: [bookedBy], references: [id])
-  bookingDate      DateTime
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  price       Int
+  bookedBy    String
+  bookedUser  User     @relation(fields: [bookedBy], references: [id])
+  bookingDate DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([eventId])
   @@index([bookedBy])
