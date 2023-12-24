@@ -1,8 +1,8 @@
-function percant(number1:number,number2:number){
+export function percant(number1:number,number2:number){
   let number = (number2/100 );
   let discoubt_number = (number*number1)
   let final = number1 - discoubt_number
   return final
 }
 
-console.log(percant(4000,15))
+console.log(percant(1503,23))
