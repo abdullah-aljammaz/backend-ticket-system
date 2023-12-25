@@ -7,7 +7,6 @@ import * as jwt from 'jsonwebtoken';
 interface IUser {
   id: string;
   role: string;
-  iat: number;
 }
 
 const protect = (req: Request, res: Response, next: NextFunction) => {

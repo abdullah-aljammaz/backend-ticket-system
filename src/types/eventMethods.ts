@@ -66,9 +66,6 @@ app.get("/events", async (req, res) => {
 // Create Event
 export async function createEvent(req: Request, res: Response) {
   let newEvent = req.body as Event;
-  await prisma.user.findFirst({
-    where: { id: newEvent.admin_id },
-  });
   await prisma.event.create({ data: newEvent });
   res.json("event added");
 }

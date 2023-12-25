@@ -47,7 +47,7 @@ model Event {
   price           Int
   discount        String?
   discount_end    DateTime?
-  admin_id        String
+  admin_id        String      
   isBooked        Boolean      @default(false)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt

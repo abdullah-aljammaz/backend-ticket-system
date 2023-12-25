@@ -41,7 +41,7 @@ import {
   updateEvent,
 } from "./types/eventMethods";
 
-app.post("/event/create", createEvent);
+app.post("/event/create", createEvent,protect,authorize("ADMIN"));
 app.get("/event/get_All", getAllEvents);
 app.get("/event/get_with_price", getEventWithPrice);
 app.get("/event/get_By_Id/:id", getEventById);
