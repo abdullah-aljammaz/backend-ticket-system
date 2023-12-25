@@ -45,7 +45,8 @@ model Event {
   image           String?
   avalible_ticket Int          @default(0)
   price           Int
-  discount        String?
+  discount        Int?
+  final_price     Int
   discount_end    DateTime?
   admin_id        String      
   isBooked        Boolean      @default(false)
