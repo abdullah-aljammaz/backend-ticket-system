@@ -27,7 +27,7 @@ model User {
   firstName String
   lastName  String
   phone     String
-  role      Roles @default(USER)
+  role      Roles     @default(USER)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   payments  Payment[]
@@ -40,15 +40,15 @@ model Event {
   title           String       @unique
   description     String
   location        String
-  startDate       DateTime
-  endDate         DateTime
+  startDate       DateTime?
+  endDate         DateTime?
   image           String?
-  avalible_ticket Int          @default(0)
-  price           Int
-  discount        Int?
-  final_price     Int
+  avalible_ticket String       
+  price           String
+  discount        String?      @default("0")
+  final_price     String
   discount_end    DateTime?
-  admin_id        String      
+  admin_id        String
   isBooked        Boolean      @default(false)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -63,11 +63,11 @@ model Ticket {
   id          String   @id @default(uuid())
   eventId     String
   event       Event    @relation(fields: [eventId], references: [id])
-  // number_of_guests Int
-  price       Int
   bookedBy    String
+  number_of_guests String 
   bookedUser  User     @relation(fields: [bookedBy], references: [id])
-  bookingDate DateTime
+  price       String
+  bookingDate DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -89,8 +89,7 @@ model Categories {
   id       String @id @default(uuid())
   name     String
   img      String
-  event_id String
-  event    Event  @relation(fields: [event_id], references: [id])
+event Event[]
 
-  @@index([event_id])
+  
 }

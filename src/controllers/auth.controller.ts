@@ -1,5 +1,6 @@
 import { User, Ticket, Event, Categories, Payment } from "@prisma/client";
 import { connectDB, prisma } from "../config/db";
+import { percant } from "../config/disc";
 import express, { ErrorRequestHandler, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import cron from "node-cron";
@@ -7,7 +8,6 @@ import * as jwt from "jsonwebtoken";
 const argon2 = require("argon2");
 const app = express();
 app.use(express.json());
-
 
 async function deleteEventWhenFinish() {
   const eventTimeEnd = await prisma.event.findMany({
@@ -48,7 +48,6 @@ async function deleteDiscoubtWhenFinish() {
   }
 }
 
-
 cron.schedule("* * * * *", () => {
   deleteEventWhenFinish();
   deleteDiscoubtWhenFinish();
@@ -58,29 +57,36 @@ app.get("/events", async (req, res) => {
   res.json(events);
 });
 // Create Event
-export async function createEvent(req: Request, res: Response) {
+async function createEvent(req: Request, res: Response) {
   let newEvent = req.body as Event;
   let user = res.locals.user;
-  newEvent.admin_id = user.Id
+  if (!newEvent.price || !newEvent.discount) {
+    return res.status(400).json({
+      message: "Wrong input discount or price",
+    });
+  }
+  let final = percant(Number(newEvent.price), Number(newEvent.discount));
+  newEvent.final_price = String(final);
+  newEvent.admin_id = user.id;
   await prisma.event.create({ data: newEvent });
   res.json("event added");
 }
 
 // Get All Events
-export async function getAllEvents(req: Request, res: Response) {
+async function getAllEvents(req: Request, res: Response) {
   let all_event = await prisma.event.findMany();
   res.json(all_event);
 }
 
 // Get Event With Id
-export async function getEventById(req: Request, res: Response) {
+async function getEventById(req: Request, res: Response) {
   let { id } = req.params;
   let event = await prisma.event.findMany({ where: { id: id } });
   res.json(event);
 }
 
 // update Event
-export async function updateEvent(req: Request, res: Response) {
+async function updateEvent(req: Request, res: Response) {
   const { id } = req.params;
   let UpdataEvent = req.body as Event;
 
@@ -89,12 +95,12 @@ export async function updateEvent(req: Request, res: Response) {
 }
 
 // delete Event
-export async function deleteEvent(req: Request, res: Response) {
+async function deleteEvent(req: Request, res: Response) {
   const { id } = req.params;
   await prisma.event.delete({ where: { id: id } });
   res.json("Event Deleted");
 }
-export async function getEventWithPrice(req: Request, res: Response) {
+async function getEventWithPrice(req: Request, res: Response) {
   let EventPrice = req.body as Event;
   let event = await prisma.event.findMany({
     where: { price: EventPrice.price },
@@ -103,10 +109,12 @@ export async function getEventWithPrice(req: Request, res: Response) {
 }
 
 // Create User In Database
-export async function registerUser(req: Request, res: Response) {
+async function registerUser(req: Request, res: Response) {
   const newUser = req.body as User;
   const hashedPassword = await argon2.hash(newUser.password);
+
   newUser.password = hashedPassword;
+  try{
   await prisma.user.create({
     data: newUser,
   });
@@ -114,10 +122,18 @@ export async function registerUser(req: Request, res: Response) {
     message: "Welcome to the website ! , user added !",
   });
 }
+catch (error) {
+  return res.status(401).json({
+    message: "Email Is Already Use",
+  });
+}
+
+  }
+
 
 // login
 
-export async function loginUser(req: Request, res: Response) {
+async function loginUser(req: Request, res: Response) {
   const { email, password } = req.body as User;
   const user = await prisma.user.findFirst({
     where: { email },
@@ -148,14 +164,13 @@ export async function loginUser(req: Request, res: Response) {
   });
 }
 
-
 // Get All users
-export async function getAllUsers(req: Request, res: Response) {
+async function getAllUsers(req: Request, res: Response) {
   let users = await prisma.user.findMany();
   res.json(users);
 }
 // Get User With Id
-export async function getUserById(req: Request, res: Response) {
+async function getUserById(req: Request, res: Response) {
   let { id } = req.params;
   let user = await prisma.user.findMany({
     where: { id: id },
@@ -165,14 +180,14 @@ export async function getUserById(req: Request, res: Response) {
 }
 
 // Delete User
-export async function deleteUser(req: Request, res: Response) {
+async function deleteUser(req: Request, res: Response) {
   const { id } = req.params;
   await prisma.user.delete({ where: { id: id } });
   res.json("delete done");
 }
 
 // Update User
-export async function updateUser(req: Request, res: Response) {
+async function updateUser(req: Request, res: Response) {
   let { id } = req.params;
   let newDataUser = req.body as User;
   await prisma.user.update({ where: { id: id }, data: newDataUser });
@@ -181,8 +196,60 @@ export async function updateUser(req: Request, res: Response) {
 
 // add payment
 
-export async function addPayment(req: Request, res: Response)  {
+async function addPayment(req: Request, res: Response) {
   let newPayment = req.body as Payment;
   await prisma.payment.create({ data: newPayment });
   res.json("Payment added");
+}
+
+export async function list(req: Request, res: Response) {
+  const user = res.locals.user;
+
+  const todoList = await prisma.event.findMany({
+    where: { admin_id: user.id },
+  });
+
+  return res.status(200).json(todoList);
+}
+
+async function createTicket(req: Request, res: Response) {
+  let newTicket = req.body as Ticket;
+  let user = res.locals.user;
+  let getFi = await prisma.event.findFirst({where:{id:newTicket.eventId}, select:{final_price:true}})
+  if (!getFi){
+    console.log(getFi)
+    return res.status(400).json({
+      message: "Price Have Issus",
+    });
+  }
+  newTicket.price = getFi.final_price
+  newTicket.bookedBy = user.id;
+  await prisma.ticket.create({
+    data: newTicket,
+  });
+  res.json("Ticket Created");
+}
+async function getTicketByUser(req: Request, res: Response) {
+  let user = res.locals.user;
+  let allTicket = await prisma.ticket.findMany({where:{id:user.id}})
+  return (allTicket)
+}
+
+
+export {
+  addPayment,
+  getTicketByUser,
+  updateUser,
+  deleteUser,
+  createEvent,
+  getAllEvents,
+  getEventById,
+  updateEvent,
+  deleteEvent,
+  getEventWithPrice,
+  registerUser,
+  loginUser,
+  getAllUsers,
+  getUserById,
+  createTicket,
 };

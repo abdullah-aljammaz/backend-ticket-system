@@ -4,5 +4,3 @@ export function percant(number1:number,number2:number){
   let final = number1 - discoubt_number
   return final
 }
-
-console.log(percant(1503,23))
