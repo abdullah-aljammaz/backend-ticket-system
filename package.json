@@ -1,12 +1,12 @@
 {
-  "name": "9-host",
+  "name": "reserify-ticket-system",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/main.ts",
-    "idst": "nodemon dist/main.js"
+    "dev": "nodemon src/app.ts",
+    "idst": "nodemon dist/app.js"
   },
   "keywords": [],
   "author": "",
