@@ -43,7 +43,7 @@ model Event {
   startDate       DateTime?
   endDate         DateTime?
   image           String?
-  avalible_ticket String       
+  avalible_ticket String
   price           String
   discount        String?      @default("0")
   final_price     String
@@ -60,16 +60,16 @@ model Event {
 }
 
 model Ticket {
-  id          String   @id @default(uuid())
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id])
-  bookedBy    String
-  number_of_guests String 
-  bookedUser  User     @relation(fields: [bookedBy], references: [id])
-  price       String
-  bookingDate DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(uuid())
+  eventId          String
+  event            Event    @relation(fields: [eventId], references: [id])
+  bookedBy         String
+  number_of_guests String
+  bookedUser       User     @relation(fields: [bookedBy], references: [id])
+  price            String
+  bookingDate      DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([eventId])
   @@index([bookedBy])
@@ -86,10 +86,8 @@ model Payment {
 }
 
 model Categories {
-  id       String @id @default(uuid())
-  name     String
-  img      String
-event Event[]
-
-  
+  id    String  @id @default(uuid())
+  name  String
+  img   String
+  event Event[]
 }

@@ -18,6 +18,13 @@ async function deleteEventWhenFinish() {
     },
   });
   if (eventTimeEnd.length > 0) {
+    await prisma.ticket.deleteMany({
+      where: {
+        eventId: {
+          in: eventTimeEnd.map((event) => event.id),
+        },
+      },
+    });
     await prisma.event.deleteMany({
       where: {
         id: {
@@ -114,22 +121,19 @@ async function registerUser(req: Request, res: Response) {
   const hashedPassword = await argon2.hash(newUser.password);
 
   newUser.password = hashedPassword;
-  try{
-  await prisma.user.create({
-    data: newUser,
-  });
-  return res.status(201).json({
-    message: "Welcome to the website ! , user added !",
-  });
-}
-catch (error) {
-  return res.status(401).json({
-    message: "Email Is Already Use",
-  });
-}
-
+  try {
+    await prisma.user.create({
+      data: newUser,
+    });
+    return res.status(201).json({
+      message: "Welcome to the website ! , user added !",
+    });
+  } catch (error) {
+    return res.status(401).json({
+      message: "Email Is Already Use",
+    });
   }
-
+}
 
 // login
 
@@ -215,14 +219,17 @@ export async function list(req: Request, res: Response) {
 async function createTicket(req: Request, res: Response) {
   let newTicket = req.body as Ticket;
   let user = res.locals.user;
-  let getFi = await prisma.event.findFirst({where:{id:newTicket.eventId}, select:{final_price:true}})
-  if (!getFi){
-    console.log(getFi)
+  let getFi = await prisma.event.findFirst({
+    where: { id: newTicket.eventId },
+    select: { final_price: true },
+  });
+  if (!getFi) {
+    console.log(getFi);
     return res.status(400).json({
       message: "Price Have Issus",
     });
   }
-  newTicket.price = getFi.final_price
+  newTicket.price = getFi.final_price;
   newTicket.bookedBy = user.id;
   await prisma.ticket.create({
     data: newTicket,
@@ -231,10 +238,9 @@ async function createTicket(req: Request, res: Response) {
 }
 async function getTicketByUser(req: Request, res: Response) {
   let user = res.locals.user;
-  let allTicket = await prisma.ticket.findMany({where:{id:user.id}})
-  return (allTicket)
+  let allTicket = await prisma.ticket.findMany({ where: { id: user.id } });
+  return allTicket;
 }
-
 
 export {
   addPayment,
