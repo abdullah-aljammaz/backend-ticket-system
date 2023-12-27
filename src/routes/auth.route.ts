@@ -14,6 +14,8 @@ deleteUser,
 updateUser,
 list,
 createTicket,
+addPayment,
+getTicketByUser
 } from "../controllers/auth.controller";
 import { authorize, protect } from "../middleware/auth";
 
@@ -30,12 +32,14 @@ router.put("/user/delete/:id",updateUser);
 router.post("/event/create",protect,authorize("ADMIN"),createEvent);
 router.get("/event/get_all",getAllEvents);
 router.get("/html/admin.html",list,protect,authorize("ADMIN"));
-router.get("/event/getById/:id",protect,authorize("ADMIN"),getEventById);
+router.get("/event/getById/",protect,getEventById);
 router.put("/event/update/:id",protect,authorize("ADMIN"),updateEvent);
 router.delete("/event/delete/:id",protect,authorize("ADMIN"),deleteEvent);
 router.get("/event/",getEventWithPrice);
 
 // create Ticket
 router.post("/ticket/create",protect, createTicket);
+router.post("/payment/create",protect, addPayment);
+router.get("/ticket/getByUser",protect, getTicketByUser);
 
 export default router;

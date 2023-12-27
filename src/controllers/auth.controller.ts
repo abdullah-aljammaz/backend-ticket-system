@@ -202,8 +202,16 @@ async function updateUser(req: Request, res: Response) {
 
 async function addPayment(req: Request, res: Response) {
   let newPayment = req.body as Payment;
-  await prisma.payment.create({ data: newPayment });
-  res.json("Payment added");
+  const user = res.locals.user;
+  newPayment.user_id = user.id;
+
+  try {
+    await prisma.payment.create({ data: newPayment });
+    res.json("Payment added successfully");
+  } catch (error) {
+    console.error("Error adding payment:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 }
 
 export async function list(req: Request, res: Response) {
@@ -219,6 +227,7 @@ export async function list(req: Request, res: Response) {
 async function createTicket(req: Request, res: Response) {
   let newTicket = req.body as Ticket;
   let user = res.locals.user;
+  newTicket.bookedBy = user.id
   let getFi = await prisma.event.findFirst({
     where: { id: newTicket.eventId },
     select: { final_price: true },
@@ -236,10 +245,12 @@ async function createTicket(req: Request, res: Response) {
   });
   res.json("Ticket Created");
 }
+
+
 async function getTicketByUser(req: Request, res: Response) {
   let user = res.locals.user;
-  let allTicket = await prisma.ticket.findMany({ where: { id: user.id } });
-  return allTicket;
+  let allTicket = await prisma.ticket.findMany({ where: { bookedBy  : user.id } });
+  res.json( allTicket);
 }
 
 export {
